@@ -8,6 +8,8 @@ def take_exam(tasks: dict) -> dict:
     :param tasks: тест
     :return: ответы
     """
+    random.seed(42)
+
     answers = {}
 
     for task in tasks:
@@ -60,8 +62,8 @@ def take_exam(tasks: dict) -> dict:
                 )
 
         else:
-            answer = 1
-            #raise RuntimeError('Unknown question type: {}'.format(question['type']))
+            #answer = 1
+            raise RuntimeError('Unknown question type: {}'.format(question['type']))
 
         answers[task['id']] = answer
 
