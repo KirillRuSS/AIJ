@@ -51,10 +51,9 @@ def take_exam(tasks: dict) -> dict:
                 answer = (
                     ''
                 )
-
         else:
             raise RuntimeError('Unknown question type: {}'.format(question['type']))
 
-        answers[task['id']] = ""#answer
+        answers[task['id']] = answer
 
     return answers
