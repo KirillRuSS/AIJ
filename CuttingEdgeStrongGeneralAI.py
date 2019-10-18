@@ -3,7 +3,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from solvers import solver19
+from solvers import solver19, solver0
 from utils import *
 from solvers import *
 
@@ -26,10 +26,10 @@ class CuttingEdgeStrongGeneralAI(object):
             solver2,
             solver3,
             solver4,
-            solver5,
+            solver0,
             solver6,
             solver7,
-            solver8,
+            solver0,
             solver9,
             solver10,
             solver10,
@@ -58,7 +58,12 @@ class CuttingEdgeStrongGeneralAI(object):
             solver_index = i + 1
             train_tasks = load_tasks(self.train_path, task_num=solver_index)
             solver_path = os.path.join("data", "models", "solver{}.pkl".format(solver_index))
-            solver = solver_class.Solver(**solver_param[solver_index])
+
+            if 17 < solver_index < 21:
+                solver = solver_class.Solver()
+            else:
+                solver = solver_class.Solver(**solver_param[solver_index])
+
             if os.path.exists(solver_path):
                 print("Loading Solver {}".format(solver_index))
                 solver.load(solver_path)

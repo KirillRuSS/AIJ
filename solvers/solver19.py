@@ -4,9 +4,10 @@ import random
 import numpy as np
 from keras_bert import load_trained_model_from_checkpoint
 from solvers import tokenization
+from solvers.utils import AbstractSolver
 
 
-class Solver(object):
+class Solver(AbstractSolver):
 
     def __init__(self, seed=42, data_path='data/'):
         self.is_train_task = False

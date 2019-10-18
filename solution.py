@@ -4,11 +4,6 @@ from CuttingEdgeStrongGeneralAI import CuttingEdgeStrongGeneralAI
 
 app = Flask(__name__)
 
-
-import nltk
-nltk.download('stopwords')
-nltk.download('punkt')
-
 ai = CuttingEdgeStrongGeneralAI()
 
 

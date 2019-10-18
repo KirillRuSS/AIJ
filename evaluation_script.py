@@ -1,6 +1,6 @@
 import numpy as np
 
-from solvers import solver19
+from solvers import solver19, solver0
 from utils import *
 from solvers import *
 import time
@@ -25,10 +25,10 @@ class Evaluation(object):
             solver2.Solver(),
             solver3.Solver(),
             solver4.Solver(),
-            solver5.Solver(),
+            solver0.Solver(),
             solver6.Solver(),
             solver7.Solver(),
-            solver8.Solver(),
+            solver0.Solver(),
             solver9.Solver(),
             solver10.Solver(),
             solver10.Solver(),

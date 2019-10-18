@@ -19,6 +19,7 @@ def get_gerund(features):
 
     return hypothesys
 
+
 def get_indirect_speech(features):
     """ косвенная речь """
     hypothesys = []
@@ -27,6 +28,7 @@ def get_indirect_speech(features):
             if row[8] == '1':
                 hypothesys.append(" ".join([row[2] for row in feature]))
     return hypothesys
+
 
 def get_app(features):
     """ Приложение """
@@ -39,6 +41,7 @@ def get_app(features):
                 if row1[2][1:][0].isupper():
                     hypothesys.append(" ".join([row[2] for row in feature]))
     return hypothesys
+
 
 def get_predicates(features):
     """ связь подлежащее сказуемое root + subj = number """
@@ -61,6 +64,7 @@ def get_predicates(features):
                 hypothesys.add(" ".join([row[2] for row in feature]))
     return hypothesys
 
+
 def get_clause(features):
     """ сложные предложения """
     hypothesys = set()
@@ -80,6 +84,7 @@ def get_participle(features):
                 if "VerbForm=Part" in row[5]:
                     hypothesys.append(" ".join([row[2] for row in feature]))
     return hypothesys
+
 
 def get_verbs(features):
     """ вид и время глаголов """
@@ -103,12 +108,13 @@ def get_verbs(features):
             for s in row[5].split('|'):
                 if "Tense" in s:
                     row_tense = s.replace("Tense=", "")
-            if row[4] == "VERB" and row_aspect != aspect: # head ?
+            if row[4] == "VERB" and row_aspect != aspect:  # head ?
                 hypothesys.add(" ".join([row[2] for row in feature]))
 
             if row[4] == "VERB" and row_tense != tense:
                 hypothesys.add(" ".join([row[2] for row in feature]))
     return hypothesys
+
 
 def get_nouns(features):
     """ формы существительных ADP + NOUN"""
@@ -122,12 +128,13 @@ def get_nouns(features):
                     hypothesys.add(" ".join([row[2] for row in feature]))
     return hypothesys
 
+
 def get_numerals(features):
     hypothesys = []
     for feature in features:
-            for row in feature:
-                if row[4] == "NUM":
-                    hypothesys.append(" ".join([row[2] for row in feature]))
+        for row in feature:
+            if row[4] == "NUM":
+                hypothesys.append(" ".join([row[2] for row in feature]))
     return hypothesys
 
 
@@ -147,8 +154,8 @@ class Solver():
         self.morph = pymorphy2.MorphAnalyzer()
         self.categories = set()
         self.has_model = True
-        self.model = Model.load("data/udpipe_syntagrus.model")
-        self.process_pipeline = Pipeline(self.model, 'tokenize', Pipeline.DEFAULT, Pipeline.DEFAULT, 'conllu')
+        self.model = Model.load("data/udpipe_syntagrus.model".encode())
+        self.process_pipeline = Pipeline(self.model, 'tokenize'.encode(), Pipeline.DEFAULT, Pipeline.DEFAULT, 'conllu'.encode())
         self.seed = seed
         self.label_dict = {
             'деепричастный оборот': "get_gerund",
@@ -169,8 +176,8 @@ class Solver():
         return random.seed(self.seed)
 
     def get_syntax(self, text):
-        processed = self.process_pipeline.process(text)
-        content = [l for l in processed.split('\n') if not l.startswith('#')]
+        processed = self.process_pipeline.process(text.encode())
+        content = [l for l in processed.decode().split('\n') if not l.startswith('#')]
         tagged = [w.split('\t') for w in content if w]
         return tagged
 
@@ -179,12 +186,12 @@ class Solver():
         tagged = self.get_syntax(some_sent)
         features = []
         for token in tagged:
-            _id, token, lemma, pos, _, grammar, head, synt, _, _, = token #tagged[n]
+            _id, token, lemma, pos, _, grammar, head, synt, _, _, = token  # tagged[n]
             capital, say = "0", "0"
             if lemma[0].isupper():
-                    capital = "1"
+                capital = "1"
             if lemma in ["сказать", "рассказать", "спросить", "говорить"]:
-                    say = "1"
+                say = "1"
             feature_string = [_id, capital, token, lemma, pos, grammar, head, synt, say]
             features.append(feature_string)
         return features
@@ -197,11 +204,11 @@ class Solver():
         for token in condition.split():
             lemma = self.morph.parse(token)[0].normal_form
             if lemma not in [
-                    "неправильный", "построение", "предложение", "с", "ошибка", "имя",
-                    "видовременной", "видо-временной", "предложно-падежный", "падежный",
-                    "неверный", "выбор", "между", "нарушение", "в", "и", "употребление",
-                    "предлог", "видовременный", "временной"
-                ]:
+                "неправильный", "построение", "предложение", "с", "ошибка", "имя",
+                "видовременной", "видо-временной", "предложно-падежный", "падежный",
+                "неверный", "выбор", "между", "нарушение", "в", "и", "употребление",
+                "предлог", "видовременный", "временной"
+            ]:
                 norm_cat += lemma + ' '
         self.categories.add(norm_cat[:-1])
         return norm_cat
@@ -217,7 +224,7 @@ class Solver():
         X = []
         for cond in conditions:  # LEFT
             good_conditions.append(self.normalize_category(cond))
-                    
+
         for choice in choices:
             choice = re.sub("[0-9]\\s?\)", "", choice["text"])
             X.append(choice)
@@ -306,7 +313,7 @@ class Solver():
             label2hypothesys[label] = hypotesis
 
         final_pred_dict = self.match_choices(label2hypothesys, choices)
-        
+
         pred_dict = {}
         for cond, key in zip(conditions, ["A", "B", "C", "D", "E"]):
             cond = cond.rstrip()

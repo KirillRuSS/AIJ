@@ -1,10 +1,10 @@
-import pickle
-import random
+from ufal.udpipe import Model, Pipeline
 from difflib import get_close_matches
 from string import punctuation
-
+import pickle
 import pymorphy2
-from ufal.udpipe import Model, Pipeline
+import re
+import random
 
 
 class Solver(object):
@@ -12,11 +12,8 @@ class Solver(object):
     def __init__(self, seed=42):
 
         self.morph = pymorphy2.MorphAnalyzer()
-
-        name = "data/udpipe_syntagrus.model"
-
-        self.model = Model.load(name)
-        self.process_pipeline = Pipeline(self.model, 'tokenize', Pipeline.DEFAULT, Pipeline.DEFAULT, 'conllu')
+        self.model = Model.load("data/udpipe_syntagrus.model".encode())
+        self.process_pipeline = Pipeline(self.model, 'tokenize'.encode(), Pipeline.DEFAULT, Pipeline.DEFAULT, 'conllu'.encode())
         self.seed = seed
         self.init_seed()
         self.paronyms = self.get_paronyms()
@@ -81,7 +78,7 @@ class Solver(object):
             except IndexError:
                 str_grammar = str(token_all.tag)
 
-            gr = set(str_grammar.replace("Qual ", "").replace(' ',',').split(','))
+            gr = set(str_grammar.replace("Qual ", "").replace(' ', ',').split(','))
             try:
                 final_paronym = paronym_parse.inflect(gr).word
             except AttributeError:
@@ -91,8 +88,8 @@ class Solver(object):
         return final_paronym
 
     def syntax_parse(self, some_text, token):
-        processed = self.process_pipeline.process(some_text.lower())
-        content = [l for l in processed.split('\n') if not l.startswith('#')]
+        processed = self.process_pipeline.process(some_text.lower().encode())
+        content = [l for l in processed.decode().split('\n') if not l.startswith('#')]
         tagged = [w.split('\t') for w in content if w]
 
         linked_word = ''
@@ -151,7 +148,7 @@ class Solver(object):
 
     def fit(self, tasks):
         pass
-        
+
     def load(self, path="data/models/solver5.pkl"):
         pass
 
@@ -163,8 +160,8 @@ class Solver(object):
         sents = []
         for line in description.split("\n"):
             for token in line.split():
-                if token.isupper() and len(token) > 2: # get CAPS paronyms
+                if token.isupper() and len(token) > 2:  # get CAPS paronyms
                     second_pair = self.find_paronyms(token)
                     sents.append((token, second_pair, line))
         result = self.check_frequencies(sents)
-        return result.strip(punctuation+'\n')
+        return result.strip(punctuation + '\n')
