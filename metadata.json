@@ -1,4 +1,4 @@
 {
-    "image": "sberbank/python",
-    "entry_point": "python server.py"
+    "image": "kirillru/aij",
+    "entry_point": "python solution.py"
 }
