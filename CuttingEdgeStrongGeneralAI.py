@@ -9,11 +9,7 @@ from solvers import *
 
 import traceback
 
-solver_param = defaultdict(dict)
-solver_param[17]["train_size"] = 0.9
-solver_param[18]["train_size"] = 0.85
-solver_param[19]["train_size"] = 0.85
-solver_param[20]["train_size"] = 0.85
+
 
 
 class CuttingEdgeStrongGeneralAI(object):
@@ -26,10 +22,10 @@ class CuttingEdgeStrongGeneralAI(object):
             solver2,
             solver3,
             solver4,
-            solver5,
+            solver0,
             solver6,
             solver7,
-            solver8,
+            solver0,
             solver9,
             solver10,
             solver10,
@@ -38,7 +34,7 @@ class CuttingEdgeStrongGeneralAI(object):
             solver14,
             solver15,
             solver16,
-            solver17,
+            solver19,
             solver19,
             solver19,
             solver19,
@@ -53,16 +49,20 @@ class CuttingEdgeStrongGeneralAI(object):
         self.clf_fitting()
 
     def solver_loading(self, solver_classes):
+        _solver19 = solver19.Solver()
+        _solver19.load()
+
         solvers = []
         for i, solver_class in enumerate(solver_classes):
             solver_index = i + 1
             train_tasks = load_tasks(self.train_path, task_num=solver_index)
             solver_path = os.path.join("data", "models", "solver{}.pkl".format(solver_index))
 
-            if 17 < solver_index < 21:
-                solver = solver_class.Solver()
+            if str(solver_classes[solver_index-1].Solver)=="<class 'solvers.solver19.Solver'>":
+                solvers.append(_solver19)
+                continue
             else:
-                solver = solver_class.Solver(**solver_param[solver_index])
+                solver = solver_class.Solver()
 
             if os.path.exists(solver_path):
                 print("Loading Solver {}".format(solver_index))
@@ -70,13 +70,14 @@ class CuttingEdgeStrongGeneralAI(object):
             else:
                 print("Fitting Solver {}...".format(solver_index))
                 try:
-                    solver = solver_class.Solver(**solver_param[solver_index])
+                    solver = solver_class.Solver()
                     solver.fit(train_tasks)
                     solver.save(solver_path)
                 except Exception as e:
                     print('Exception during fitting: {}'.format(e))
             print("Solver {} is ready!\n".format(solver_index))
             solvers.append(solver)
+        #solvers[18].predict_from_model(None) #!!!
         return solvers
 
     def clf_fitting(self):
@@ -149,17 +150,18 @@ class CuttingEdgeStrongGeneralAI(object):
         else:
             variant = exam
         task_number = self.classifier.predict(variant)
+        #task_number = task_number*0+19
         print("Classifier results: ", task_number)
         for i, task in enumerate(variant):
             task_id = task['id']
             task_index, task_type = i + 1, task["question"]["type"]
             try:
-                if task_number[i] >= 16 or task_number[i] <= 20:
-                    prediction = self.solvers[task_number[i] - 1].predict_from_model(task)
-                else:
-                    prediction = ""
+                #if task_number[i] >= 16 or task_number[i] <= 20:
+                prediction = self.solvers[task_number[i] - 1].predict_from_model(task)
+                #else:
+                #    prediction = ""
 
-                print("Prediction: ", prediction)
+                print("Prediction " + str(task_number[i]) + ": ", prediction)
             except Exception as e:
                 print(traceback.format_exc())
                 prediction = self.not_so_strong_task_solver(task)

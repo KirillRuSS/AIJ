@@ -1,4 +1,4 @@
 {
-    "image": "kirillru/aij",
+    "image": "kirillru/aij:data",
     "entry_point": "python solution.py"
 }

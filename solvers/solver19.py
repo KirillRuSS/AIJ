@@ -1,9 +1,13 @@
 import re
 import os
 import random
+import time
+
 import numpy as np
+import tensorflow as tf
 from keras_bert import load_trained_model_from_checkpoint
 from solvers import tokenization
+from solvers.punctuation_bert import PunctuationBert
 from solvers.utils import AbstractSolver
 
 
@@ -13,10 +17,10 @@ class Solver(AbstractSolver):
         self.is_train_task = False
         self.seed = seed
         self.init_seed()
-        self.model_path = '/home/data/punctuation-bert'
 
-        self.model = None
         self.tokenizer = None
+        self.model_path = '/home/data/punctuation-bert'
+        self.PunctuationBert = PunctuationBert(self.model_path)
 
     def init_seed(self):
         random.seed(self.seed)
@@ -36,21 +40,20 @@ class Solver(AbstractSolver):
         pass
 
     def load(self, path="/home/data/punctuation-bert"):
-        config_path = self.model_path + '/bert_config.json'
-        checkpoint_path = self.model_path + '/model.ckpt-35000'
         vocab_path = self.model_path + '/vocab.txt'
-
         self.tokenizer = tokenization.FullTokenizer(vocab_file=vocab_path, do_lower_case=False)
 
         print('Loading punctuation-bert model...')
-        self.model = load_trained_model_from_checkpoint(config_path, checkpoint_path, training=True)
+        self.PunctuationBert.start()
         print('OK')
 
     def save(self, path):
         pass
 
     def predict_from_model(self, task):
-        sentence = self.process_task(task)
+        sentence = ""
+        if task != None:
+            sentence = self.process_task(task)
 
         sentence = re.sub(r'\d', '[PMASK]', sentence)
         sentence = sentence.replace('(', '').replace(')', '')
@@ -81,7 +84,12 @@ class Solver(AbstractSolver):
         mask_input = np.asarray([mask_input])
         seg_input = np.asarray([seg_input])
 
-        predicts = self.model.predict([token_input, seg_input, mask_input])[0]
+        self.PunctuationBert.input = [token_input, seg_input, mask_input]
+        while self.PunctuationBert.state != "waiting":
+            time.sleep(0.1)
+        predicts = self.PunctuationBert.output[0]
+        self.PunctuationBert.output = None
+
         predicts = np.argmax(predicts, axis=-1)
 
         predicts = predicts[0][:len(tokens)]

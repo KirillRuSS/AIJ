@@ -27,3 +27,7 @@ class Solver(object):
 
     def save(self, path="data/models/solver4.pkl"):
         pass
+
+    def predict_from_model(self, a):
+        return []
+
